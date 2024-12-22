@@ -5,10 +5,18 @@
         <script src="https://unpkg.com/htmx.org@2.0.3"></script>
         <link rel="stylesheet" href="styles.css"/>
     </head>
-    <body>
+    <body x-data="{foo: 'boo'}">
         <div id="title">
             <h1>Tic Tac Toe</h1>
         </div>
-    <div id="board"></div>
+        <div class="board">
+            <template x-for="i in 3">
+                <div class="column" >
+                    <template class="row"  x-for="j in 3">
+                        <span class="text" x-text="3 * (i - 1) + j"></span>
+                    </template>
+                </div>
+            </template>
+        </div>
     </body>
 </html>
