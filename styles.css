@@ -1,0 +1,18 @@
+/* table, th, td, tr {
+    border: 1px solid black;
+    border-collapse: collapse;
+    table-layout: auto;
+    column-width: 10px;
+    justify-content: center;
+    align-content: center;
+    display: grid;
+    position: relative;
+     z-index: 99; 
+  } */
+
+  td {
+    border: 1px solid black;
+    height: 50px;
+    width: 50px;
+    }
+    
