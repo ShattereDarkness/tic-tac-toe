@@ -1,2 +1,2 @@
-go get 
+go get . 
 go run .
