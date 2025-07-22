@@ -21,6 +21,7 @@ func init() {
 	}
 
 	templates["index.html"] = template.Must(template.ParseFiles("static/index.html"))
+	// templates["styles.css"] = template.Must(template.ParseFiles("static/styles.css"))
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -36,35 +37,35 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func actionHandler(w http.ResponseWriter, r *http.Request) {
-	stateJson, err := json.Marshal(state)
-
 	action := r.PostFormValue("cell-id")
 
 	log.Default().Println("Action: ", action)
 
 	actionId, err := strconv.Atoi(action)
 
-	tmpl := templates["index.html"]
-
-	if state[actionId] != "" {
-		tmpl.ExecuteTemplate(w, "index.html", map[string]template.JS{"state": template.JS(stateJson)})
-	} else {
+	if state[actionId] == "" {
 		state[actionId] = player
-
-		log.Default().Println("State: ", state)
 
 		if player == "X" {
 			player = "O"
 		} else {
 			player = "X"
 		}
-
-		tmpl.ExecuteTemplate(w, "index.html", map[string]template.JS{"state": template.JS(stateJson)})
 	}
+	
+	stateJson, err := json.Marshal(state)
+
+
+	log.Default().Println("State: ", state)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Error marshaling state:", err)
+		http.Error(w, "Server error", http.StatusInternalServerError)
+		return
 	}
+
+	tmpl := template.Must(template.ParseFiles("static/index.html"))
+	tmpl.Execute(w, map[string]template.JS{"state": template.JS(stateJson)})
 }
 
 func main() {
@@ -72,8 +73,8 @@ func main() {
 	//     fmt.Fprintf(w, "getting ti")
 	// })
 
-	// fs := http.FileServer(http.Dir("static/"))
-	// http.Handle("/", http.StripPrefix("/static/", fs))
+	fs := http.FileServer(http.Dir("static/"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/action", actionHandler)
 

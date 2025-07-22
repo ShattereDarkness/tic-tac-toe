@@ -5,27 +5,27 @@
         <script src="https://unpkg.com/htmx.org@2.0.3"></script>
         <link rel="stylesheet" href="/static/styles.css"/>
     </head>
-    <body x-data="{state: {{ .state }}}">
+    <body >
         <div id="title">
             <h1>Tic Tac Toe</h1>
         </div>
-        <div class="board">
-            <template x-for="i in 3">
-                <div class="column" >
-                    <template class="row"  x-for="j in 3">
-                        <div x-data="{id: 3 * (i - 1) + j - 1}">
-                            <button 
-                                hx-post="/action" 
-                                hx-target="body" 
-                                class="text" 
-                                :hx-include="'#hidden-' + id"
-                                x-text="state[id]"
-                                x-effect="state;htmx.process($el)"
-                                >
-                            </button>
-                            <input type="hidden" :value="id" name="cell-id" :id="'hidden-' + id">
-                        </div>
-                    </template>
+        <div class="board" x-data="{state: {{ .state }}}">
+            <template x-for="col in 3">
+                <div class="column">
+                <template x-for="row in 3">
+                    <div x-data="{ id: (row - 1) * 3 + (col - 1) }" class="cell">
+                        <button
+                            class="text"
+                            x-text="state[id]"
+                            hx-post="/action"
+                            :hx-include="'#hidden-' + id"
+                            hx-target="body"
+                            hx-swap="outerHTML"
+                            x-effect="state;htmx.process($el)"
+                        ></button>
+                        <input type="hidden" :value="id" name="cell-id" :id="'hidden-' + id">
+                    </div>
+                </template>
                 </div>
             </template>
         </div>
