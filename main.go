@@ -11,6 +11,15 @@ import (
 
 var state = []string{"", "", "", "", "", "", "", "", ""}
 
+var winStates = [][]int{{0, 1, 2},
+	{3, 4, 5},
+	{6, 7, 8},
+	{0, 3, 6},
+	{1, 4, 7},
+	{2, 5, 8},
+	{0, 4, 8},
+	{2, 4, 6}}
+
 var player = "X"
 
 var templates map[string]*template.Template
@@ -24,6 +33,31 @@ func init() {
 	// templates["styles.css"] = template.Must(template.ParseFiles("static/styles.css"))
 }
 
+func checkWin() string {
+	for _, winState := range winStates {
+		if state[winState[0]] == state[winState[1]] && state[winState[1]] == state[winState[2]] {
+			if state[winState[0]] != "" {
+				return state[winState[0]]
+			}
+		}
+	}
+
+	// Check for draw
+    isDraw := true
+    for _, cell := range state {
+        if cell == "" {
+            isDraw = false
+            break
+        }
+    }
+
+    if isDraw {
+        return "Draw"
+    }
+
+    return "N" // No winner yet
+}
+
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	stateJson, err := json.Marshal(state)
 
@@ -32,8 +66,13 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpl := templates["index.html"]
+	data := map[string]interface{}{
+		"state":   template.JS(stateJson),
+		"winner": "\"N\"",
+	}
+	tmpl.Execute(w, data)
 
-	tmpl.ExecuteTemplate(w, "index.html", map[string]template.JS{"state": template.JS(stateJson)})
+	// tmpl.ExecuteTemplate(w, "index.html", map[string]template.JS{"state": template.JS(stateJson), "winner": template.JS("N")})
 }
 
 func actionHandler(w http.ResponseWriter, r *http.Request) {
@@ -43,18 +82,23 @@ func actionHandler(w http.ResponseWriter, r *http.Request) {
 
 	actionId, err := strconv.Atoi(action)
 
-	if state[actionId] == "" {
-		state[actionId] = player
+	winner := checkWin()
 
-		if player == "X" {
-			player = "O"
-		} else {
-			player = "X"
+	log.Println("Winner:", winner)
+
+	if winner == "N" {
+		if state[actionId] == "" {
+			state[actionId] = player
+
+			if player == "X" {
+				player = "O"
+			} else {
+				player = "X"
+			}
 		}
 	}
-	
-	stateJson, err := json.Marshal(state)
 
+	stateJson, err := json.Marshal(state)
 
 	log.Default().Println("State: ", state)
 
@@ -64,8 +108,12 @@ func actionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl := template.Must(template.ParseFiles("static/index.html"))
-	tmpl.Execute(w, map[string]template.JS{"state": template.JS(stateJson)})
+	tmpl := templates["index.html"]
+	data := map[string]interface{}{
+		"state":   template.JS(stateJson),
+		"winner": "\"" + winner + "\"",
+	}
+	tmpl.Execute(w, data)
 }
 
 func main() {

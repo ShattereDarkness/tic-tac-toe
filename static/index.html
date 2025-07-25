@@ -9,7 +9,8 @@
         <div id="title">
             <h1>Tic Tac Toe</h1>
         </div>
-        <div class="board" x-data="{state: {{ .state }}}">
+
+        <div class="board" x-data="{state: {{ .state }}, winner: {{ .winner }}}">
             <template x-for="col in 3">
                 <div class="column">
                 <template x-for="row in 3">
