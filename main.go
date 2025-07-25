@@ -52,7 +52,7 @@ func checkWin() string {
     }
 
     if isDraw {
-        return "Draw"
+        return "D"
     }
 
     return "N" // No winner yet
@@ -68,7 +68,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := templates["index.html"]
 	data := map[string]interface{}{
 		"state":   template.JS(stateJson),
-		"winner": "\"N\"",
+		"winnerMessage": "\"\"",
 	}
 	tmpl.Execute(w, data)
 
@@ -98,6 +98,8 @@ func actionHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	winner = checkWin()
+
 	stateJson, err := json.Marshal(state)
 
 	log.Default().Println("State: ", state)
@@ -108,10 +110,18 @@ func actionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	winnerMessage := ""
+
+	if winner == "D" {
+		winnerMessage = "Both of you suck"
+	} else if winner != "N" {
+		winnerMessage = "Player " + winner + " is the G!"
+	}
+
 	tmpl := templates["index.html"]
 	data := map[string]interface{}{
 		"state":   template.JS(stateJson),
-		"winner": "\"" + winner + "\"",
+		"winnerMessage": "\"" + winnerMessage + "\"",
 	}
 	tmpl.Execute(w, data)
 }
