@@ -126,6 +126,21 @@ func actionHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data)
 }
 
+func resetHandler(w http.ResponseWriter, r *http.Request) {
+	// Reset game state
+	winner := checkWin()
+	player = "X"
+
+	if winner != "D" && winner != "N" {
+		player = winner
+	}
+
+	state = []string{"", "", "", "", "", "", "", "", ""}
+
+	indexHandler(w, r)
+}
+
+
 func main() {
 	// http.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
 	//     fmt.Fprintf(w, "getting ti")
@@ -135,6 +150,7 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/action", actionHandler)
+	http.HandleFunc("/reset", resetHandler)
 
 	log.Fatal(http.ListenAndServe(":7009", nil))
 }
